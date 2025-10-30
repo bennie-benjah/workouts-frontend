@@ -1,58 +1,98 @@
 import { useState } from 'react';
 import { useWorkoutsContext } from '../hooks/useWorkoutsContext';
-const WorkoutForm = () => {
-  
-    const [title, setTitle] = useState('');
-    const [load, setLoad] = useState('');
-    const [reps, setReps] = useState('');
-    const [error, setError] = useState(null);
-    const [emptyFields, setEmptyFields] = useState([]);
-    const { dispatch } = useWorkoutsContext();
+import { useAuthContext } from '../hooks/useAuthContext';
 
-const handleSubmit = async (e) => {
+const WorkoutForm = () => {
+  const { dispatch } = useWorkoutsContext();
+  const { user } = useAuthContext();
+
+  const [title, setTitle] = useState('');
+  const [load, setLoad] = useState('');
+  const [reps, setReps] = useState('');
+  const [error, setError] = useState(null);
+  const [emptyFields, setEmptyFields] = useState([]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Guard: must be logged in
+    if (!user) {
+      setError('You must be logged in');
+      return;
+    }
+
     const workout = { title, load, reps };
-    const response = await fetch('/api/workouts', {
+
+    try {
+      const response = await fetch('/api/workouts', {
         method: 'POST',
-        body: JSON.stringify(workout),
         headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-    
-    if (response.ok) {
-        const json = await response.json();
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`, // include JWT
+        },
+        body: JSON.stringify(workout),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        // Defensive handling — if server doesn’t send emptyFields, use []
+        setError(json.error || 'Failed to add workout');
+        setEmptyFields(json.emptyFields || []);
+      } else {
+        // Success: reset state
         setTitle('');
         setLoad('');
         setReps('');
         setError(null);
         setEmptyFields([]);
-        console.log("New workout added:", json);
+
+        // Dispatch to context
         dispatch({ type: 'CREATE_WORKOUT', payload: json });
-    }else {
-        const json = await response.json();
-        setEmptyFields(json.emptyFields);
-        setError(json.error);
+        console.log('✅ New workout added:', json);
+      }
+    } catch (err) {
+      console.error('❌ Error creating workout:', err);
+      setError('Something went wrong. Please try again.');
     }
-};
+  };
+
   return (
-    <div>
+    <div className="workout-form-container">
       <h2>Add a New Workout</h2>
       <form className="create" onSubmit={handleSubmit}>
-         
-        <label>
-          Title:
-          <input type="text" name="title" required value={title} onChange={(e) => setTitle(e.target.value)} className={emptyFields.includes('title') ? 'error' : ''} />
-        </label>
-        <label>
-          Load (kg):
-          <input type="number" name="load" value={load} onChange={(e) => setLoad(e.target.value)} className={emptyFields.includes('load') ? 'error' : ''} />
-        </label>
-        <label>
-          Reps:
-          <input type="number" name="reps" value={reps} onChange={(e) => setReps(e.target.value)} className={emptyFields.includes('reps') ? 'error' : ''} />
-        </label>
+        <label>Title:</label>
+        <input
+          type="text"
+          name="title"
+          placeholder="Workout title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className={emptyFields?.includes('title') ? 'error' : ''}
+        />
+
+        <label>Load (kg):</label>
+        <input
+          type="number"
+          name="load"
+          placeholder="Weight load"
+          value={load}
+          onChange={(e) => setLoad(e.target.value)}
+          className={emptyFields?.includes('load') ? 'error' : ''}
+        />
+
+        <label>Reps:</label>
+        <input
+          type="number"
+          name="reps"
+          placeholder="Number of reps"
+          value={reps}
+          onChange={(e) => setReps(e.target.value)}
+          className={emptyFields?.includes('reps') ? 'error' : ''}
+        />
+
         <button type="submit">Add Workout</button>
+
         {error && <div className="error">{error}</div>}
       </form>
     </div>
