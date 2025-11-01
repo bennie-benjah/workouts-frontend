@@ -627,7 +627,33 @@ form.create .form-group label {
   margin: 0;
   color: var(--text-medium);
 }
+/* Google button loading state */
+.google-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
 
+.google-btn:disabled:hover {
+  background: var(--bg-white);
+  border-color: var(--border-light);
+}
+
+/* Success page styles (for OAuth callback) */
+.auth-success {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.auth-success h2 {
+  color: var(--success);
+  margin-bottom: 1rem;
+}
+
+.auth-success p {
+  color: var(--text-light);
+  margin-bottom: 2rem;
+}
 .divider {
   text-align: center;
   margin: 1.5rem 0;

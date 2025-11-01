@@ -1,28 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLogin } from '../hooks/useLogin';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import AuthCarousel from '../components/AuthCarousel';
 import Footer from '../components/Footer';
+import { useAuthContext } from '../hooks/useAuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, error, isLoading } = useLogin();
+  const { dispatch } = useAuthContext();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Handle Google OAuth success
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const error = searchParams.get('error');
+
+    if (token) {
+      // Save token and user data
+      const user = { token };
+      localStorage.setItem('user', JSON.stringify(user));
+      dispatch({ type: 'LOGIN', payload: user });
+      navigate('/dashboard', { replace: true });
+    }
+
+    if (error) {
+      console.error('Google OAuth error:', error);
+    }
+  }, [searchParams, dispatch, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login(email, password);
-
-    // redirect if successful login
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user && user.token) {
-      navigate('/', { replace: true });
-    }
   };
 
   const handleGoogleSignIn = () => {
-    // In a real app you'd redirect to your backend route for Google OAuth
     window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
   };
 
@@ -47,6 +61,7 @@ const Login = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -57,10 +72,15 @@ const Login = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
 
-                <button disabled={isLoading} className="btn btn-primary">
+                <button 
+                  type="submit" 
+                  disabled={isLoading} 
+                  className="btn btn-primary"
+                >
                   {isLoading ? 'Signing in...' : 'Log in'}
                 </button>
 
@@ -70,6 +90,7 @@ const Login = () => {
                   type="button"
                   className="google-btn"
                   onClick={handleGoogleSignIn}
+                  disabled={isLoading}
                 >
                   <img
                     src="https://developers.google.com/identity/images/g-logo.png"
