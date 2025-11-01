@@ -32,7 +32,7 @@ const Navbar = () => {
             </button>
           )}
           <h1 className="nav-logo">
-            <Link to="/dashboard">💪 Workout Buddy</Link>
+            <Link to="/dashboard"><img src="/workouts-buddy-logo.png" alt="Workout Buddy Logo"/></Link>
           </h1>
         </div>
 
