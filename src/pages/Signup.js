@@ -17,7 +17,7 @@ const Signup = () => {
   // Google sign-up handler
   const handleGoogleSignUp = () => {
     // In production: redirect to your backend Google OAuth endpoint
-    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/auth/google`;
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/api/auth/google`;
   };
 
   return (

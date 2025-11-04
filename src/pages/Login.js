@@ -37,7 +37,7 @@ const Login = () => {
   };
 
   const handleGoogleSignIn = () => {
-    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/auth/google`;
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/api/auth/google`;
   };
 
   return (

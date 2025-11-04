@@ -12,7 +12,7 @@ const Home = () => {
   useEffect(() => {
     const fetchWorkouts = async () => {
      const response = await fetch(
-  `${import.meta.env.VITE_API_BASE_URL || "https://workouts-application.onrender.com"}/api/workouts`,
+  `${import.meta.env.REACT_APP_API_BASE_URL || "https://workouts-application.onrender.com"}/api/workouts`,
   {
     headers: {
       Authorization: `Bearer ${user.token}`,
